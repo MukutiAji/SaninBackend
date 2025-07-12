@@ -66,8 +66,8 @@ show_banner() {
 # ==== ⚙️ CEK DEPENDENSI
 install_dependencies() {
   cetak "[⚙️] Cek dan install dependensi..."
-  pkg update -y | print_output
-  pkg upgrade -y | print_output
+  pkg update -y 2>/dev/null | print_output
+  pkg upgrade -y 2>/dev/null | print_output
   pkg_install nodejs git
   cd "$PROJECT_DIR" || exit
   cetak "[📁] Cek folder node_modules..."
