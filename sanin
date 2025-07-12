@@ -19,9 +19,12 @@ print_output() {
   done
 }
 
-# ==== 🎭 ASCII ART OPENING
+# ==== 🎭 ASCII ART OPENING + CEK TOOLS
 ascii_art() {
   clear
+
+  # Tampilkan ascii pembuka
+  echo
   cetak "╭━━━┳━━━┳━╮╱╭┳━━┳━╮╱╭╮"
   cetak "┃╭━╮┃╭━╮┃┃╰╮┃┣┫┣┫┃╰╮┃┃"
   cetak "┃╰━━┫┃╱┃┃╭╮╰╯┃┃┃┃╭╮╰╯┃"
@@ -29,28 +32,32 @@ ascii_art() {
   cetak "┃╰━╯┃╭━╮┃┃╱┃┃┣┫┣┫┃╱┃┃┃"
   cetak "╰━━━┻╯╱╰┻╯╱╰━┻━━┻╯╱╰━╯"
   sleep 2
-}
 
-# ==== 📦 CEK & INSTALL PAKET
-pkg_install() {
-  if command -v nala &>/dev/null; then
-    cetak "[📦] Menggunakan nala..."
-    for pkg in "$@"; do
-      if ! dpkg -s $pkg &>/dev/null; then
-        nala install -y $pkg | print_output
-      else
-        cetak "[✅] $pkg sudah terinstall"
-      fi
-    done
+  cetak "🔍 Cek awal dependensi (nala, figlet, boxes)..."
+
+  # Cek dan install nala, figlet, boxes
+  if ! command -v nala &>/dev/null; then
+    cetak "[📥] Menginstall nala..."
+    apt-get install nala -y | print_output
   else
-    for pkg in "$@"; do
-      if ! command -v $pkg &>/dev/null; then
-        pkg install $pkg -y | print_output
-      else
-        cetak "[✅] $pkg sudah terinstall"
-      fi
-    done
+    cetak "[📦] nala sudah terinstall"
   fi
+
+  if ! command -v figlet &>/dev/null; then
+    cetak "[📥] Menginstall figlet..."
+    apt-get install figlet -y | print_output
+  else
+    cetak "[✅] figlet sudah terinstall"
+  fi
+
+  if ! command -v boxes &>/dev/null; then
+    cetak "[📥] Menginstall boxes..."
+    apt-get install boxes -y | print_output
+  else
+    cetak "[✅] boxes sudah terinstall"
+  fi
+
+  clear
 }
 
 # ==== 🎨 BANNER SANIN
