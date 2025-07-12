@@ -8,13 +8,19 @@ SCRIPT_PATH="$PREFIX/bin/sanin"
 COLORS=(32 33 34 35 36 91 92 93 94 95 96) # hijau kuning biru pink cyan dll
 RANDOM_COLOR=${COLORS[$RANDOM % ${#COLORS[@]}]}
 
-# Fungsi cetak berwarna
+# ==== 🔤 FUNGSI CETAK BERWARNA
 cetak() {
   echo -e "\e[1;${RANDOM_COLOR}m$1\e[0m"
 }
 
+print_output() {
+  while IFS= read -r line; do
+    echo -e "\e[1;${RANDOM_COLOR}m$line\e[0m"
+  done
+}
+
 # ==== 🎭 ASCII ART OPENING
-function ascii_art() {
+ascii_art() {
   clear
   cetak "╭━━━┳━━━┳━╮╱╭┳━━┳━╮╱╭╮"
   cetak "┃╭━╮┃╭━╮┃┃╰╮┃┣┫┣┫┃╰╮┃┃"
@@ -26,12 +32,12 @@ function ascii_art() {
 }
 
 # ==== 📦 CEK & INSTALL PAKET
-function pkg_install() {
+pkg_install() {
   if command -v nala &>/dev/null; then
     cetak "[📦] Menggunakan nala..."
     for pkg in "$@"; do
       if ! dpkg -s $pkg &>/dev/null; then
-        nala install -y $pkg
+        nala install -y $pkg | print_output
       else
         cetak "[✅] $pkg sudah terinstall"
       fi
@@ -39,7 +45,7 @@ function pkg_install() {
   else
     for pkg in "$@"; do
       if ! command -v $pkg &>/dev/null; then
-        pkg install $pkg -y
+        pkg install $pkg -y | print_output
       else
         cetak "[✅] $pkg sudah terinstall"
       fi
@@ -48,7 +54,7 @@ function pkg_install() {
 }
 
 # ==== 🎨 BANNER SANIN
-function show_banner() {
+show_banner() {
   clear
   pkg_install figlet boxes
   echo
@@ -58,22 +64,23 @@ function show_banner() {
 }
 
 # ==== ⚙️ CEK DEPENDENSI
-function install_dependencies() {
+install_dependencies() {
   cetak "[⚙️] Cek dan install dependensi..."
-  pkg update -y && pkg upgrade -y
+  pkg update -y | print_output
+  pkg upgrade -y | print_output
   pkg_install nodejs git
   cd "$PROJECT_DIR" || exit
   cetak "[📁] Cek folder node_modules..."
   if [ ! -d "node_modules" ]; then
     cetak "[📦] node_modules belum ada. Jalankan npm install..."
-    npm install
+    npm install | print_output
   else
     cetak "[✅] node_modules sudah tersedia"
   fi
 }
 
 # ==== 🚀 JALANKAN BACKEND
-function start_backend() {
+start_backend() {
   echo
   cetak "[🚀] Menjalankan server WhatsApp..."
   echo
@@ -86,7 +93,7 @@ function start_backend() {
 }
 
 # ==== 🔁 INSTALL KE $PREFIX/bin
-function install_command() {
+install_command() {
   if [ ! -f "$SCRIPT_PATH" ]; then
     cetak "[🛠️] Menambahkan shortcut 'sanin' ke \$PREFIX/bin"
     cp "$0" "$SCRIPT_PATH"
@@ -100,7 +107,7 @@ function install_command() {
 # ==== 🔄 MODE UPDATE
 if [[ $1 == "update" ]]; then
   cetak "[🔄] Update script sanin dari GitHub..."
-  curl -L -o "$SCRIPT_PATH" "$GITHUB_URL"
+  curl -L -o "$SCRIPT_PATH" "$GITHUB_URL" | print_output
   sed -i 's/\r$//' "$SCRIPT_PATH"
   chmod +x "$SCRIPT_PATH"
   cetak "[✅] Script berhasil diupdate!"
