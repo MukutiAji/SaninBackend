@@ -1,35 +1,60 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-# Lokasi folder backend lu
 PROJECT_DIR="$HOME/sanin-backend"
+GITHUB_URL="https://raw.githubusercontent.com/MukutiAji/SaninBackend/main/sanin"
 
-# ===== 🎨 LOGO & HEADER
+# ==== 🔄 MODE UPDATE
+if [[ $1 == "update" ]]; then
+    echo "[🔄] Update script sanin dari GitHub..." | lolcat
+    curl -L -o "$PREFIX/bin/sanin" "$GITHUB_URL"
+    sed -i 's/\r$//' "$PREFIX/bin/sanin"
+    chmod +x "$PREFIX/bin/sanin"
+    echo "[✅] Script berhasil diupdate!" | lolcat
+    exit
+fi
+
+# ==== 📦 INSTALL PAKAI NALA JIKA ADA
+function pkg_install() {
+    if command -v nala &>/dev/null; then
+        echo "[📦] Menggunakan nala..." | lolcat
+        for pkg in "$@"; do
+            if ! dpkg -s $pkg &>/dev/null; then
+                nala install -y $pkg
+            else
+                echo "[✅] $pkg sudah terinstall"
+            fi
+        done
+    else
+        for pkg in "$@"; do
+            if ! command -v $pkg &>/dev/null; then
+                pkg install $pkg -y
+            else
+                echo "[✅] $pkg sudah terinstall"
+            fi
+        done
+    fi
+}
+
+# ==== 🎨 LOGO
 function show_banner() {
     clear
-    for cmd in figlet lolcat boxes; do
-        if ! command -v $cmd &>/dev/null; then
-            pkg install $cmd -y
-        fi
-    done
+    pkg_install figlet lolcat boxes
 
     figlet SANIN WA | lolcat
     echo "By: Mukticuy" | boxes -d parchment | lolcat
     echo
 }
 
-# ===== 📦 INSTALL DEPENDENSI
+# ==== 🧰 CEK DEPENDENSI
 function install_dependencies() {
     echo "[⚙️] Cek dan install dependensi..." | lolcat
     pkg update -y && pkg upgrade -y
 
-    for pkg in nodejs git; do
-        if ! command -v $pkg &>/dev/null; then
-            pkg install $pkg -y
-        fi
-    done
+    pkg_install nodejs git
+
+    cd "$PROJECT_DIR" || exit
 
     echo "[📁] Cek folder node_modules..." | lolcat
-    cd "$PROJECT_DIR"
     if [ ! -d "node_modules" ]; then
         echo "[📦] node_modules belum ada. Jalankan npm install..." | lolcat
         npm install
@@ -38,13 +63,12 @@ function install_dependencies() {
     fi
 }
 
-# ===== 🚀 JALANKAN BACKEND
+# ==== 🚀 JALANKAN BACKEND
 function start_backend() {
     echo
     echo "[🚀] Menjalankan server WhatsApp..." | boxes -d peek | lolcat
     echo
-    cd
-    cd "$PROJECT_DIR"
+    cd "$PROJECT_DIR" || exit
     while true; do
         node index.js
         echo "[💥] Server mati. Restarting dalam 3 detik..." | lolcat
@@ -52,19 +76,20 @@ function start_backend() {
     done
 }
 
-# ===== 🔁 AUTO SALIN KE $PREFIX/bin
+# ==== 🔁 INSTALL KE $PREFIX/bin
 function install_command() {
     SCRIPT_PATH="$PREFIX/bin/sanin"
     if [ ! -f "$SCRIPT_PATH" ]; then
         echo "[🛠️] Menambahkan shortcut 'sanin' ke \$PREFIX/bin" | lolcat
         cp "$0" "$SCRIPT_PATH"
+        sed -i 's/\r$//' "$SCRIPT_PATH"
         chmod +x "$SCRIPT_PATH"
-        echo "[✅] Shortcut 'sanin' berhasil dibuat. Sekarang bisa ketik 'sanin' dari mana aja" | lolcat
+        echo "[✅] Sekarang bisa ketik 'sanin' dari mana aja" | lolcat
         echo
     fi
 }
 
-# ===== 🧠 MAIN
+# ==== 🧠 MAIN EKSEKUSI
 show_banner
 install_command
 install_dependencies
