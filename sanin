@@ -60,10 +60,31 @@ ascii_art() {
   clear
 }
 
+# ==== 📦 CEK & INSTALL PAKET
+pkg_install() {
+  if command -v nala &>/dev/null; then
+    cetak "[📦] Menggunakan nala..."
+    for pkg in "$@"; do
+      if ! dpkg -s $pkg &>/dev/null; then
+        nala install -y $pkg | print_output
+      else
+        cetak "[✅] $pkg sudah terinstall"
+      fi
+    done
+  else
+    for pkg in "$@"; do
+      if ! command -v $pkg &>/dev/null; then
+        pkg install $pkg -y | print_output
+      else
+        cetak "[✅] $pkg sudah terinstall"
+      fi
+    done
+  fi
+}
+
 # ==== 🎨 BANNER SANIN
 show_banner() {
   clear
-  pkg_install figlet boxes
   echo
   figlet -w 100 SANIN WA | while IFS= read -r line; do cetak "$line"; done
   echo "By: Mukticuy" | boxes -d stone | while IFS= read -r line; do cetak "$line"; done
