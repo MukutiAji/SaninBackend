@@ -10,7 +10,7 @@ RANDOM_COLOR=${COLORS[$RANDOM % ${#COLORS[@]}]}
 
 # ==== 🔤 FUNGSI CETAK BERWARNA
 cetak() {
-  echo -e "\e[1;${RANDOM_COLOR}m$1\e[0m"
+  printf "\e[1;${RANDOM_COLOR}m%s\e[0m\n" "$1"
 }
 
 print_output() {
