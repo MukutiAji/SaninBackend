@@ -88,8 +88,19 @@ pkg_install() {
 show_banner() {
   clear
   echo
-  figlet -w 100 SANIN WA | while IFS= read -r line; do cetak "$line"; done
-  echo "By: Mukticuy" | boxes -d stone | while IFS= read -r line; do cetak "$line"; done
+
+  # Tampilkan figlet tanpa kode ANSI bocor
+  figlet -w 100 "SANIN WA" | while IFS= read -r line; do
+    # Hapus ANSI escape code dari figlet (kalau ada)
+    clean_line=$(echo -e "$line" | sed 's/\x1b\[[0-9;]*m//g')
+    cetak "$clean_line"
+  done
+
+  echo "By: Mukticuy" | boxes -d stone | while IFS= read -r line; do
+    clean_line=$(echo -e "$line" | sed 's/\x1b\[[0-9;]*m//g')
+    cetak "$clean_line"
+  done
+
   echo
 }
 
