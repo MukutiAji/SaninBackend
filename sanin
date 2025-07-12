@@ -31,6 +31,7 @@ ascii_art() {
   cetak "╰━━╮┃╰━╯┃┃╰╮┃┃┃┃┃┃╰╮┃┃"
   cetak "┃╰━╯┃╭━╮┃┃╱┃┃┣┫┣┫┃╱┃┃┃"
   cetak "╰━━━┻╯╱╰┻╯╱╰━┻━━┻╯╱╰━╯"
+  sleep 1
 
   cetak "🔍 Cek awal dependensi (nala, figlet, boxes)..."
 
@@ -56,7 +57,7 @@ ascii_art() {
     cetak "[✅] boxes sudah terinstall"
   fi
 
-  sleep 5
+  sleep 2
 
   clear
 }
