@@ -1,0 +1,71 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+# Lokasi folder backend lu
+PROJECT_DIR="$HOME/sanin-backend"
+
+# ===== 🎨 LOGO & HEADER
+function show_banner() {
+    clear
+    for cmd in figlet lolcat boxes; do
+        if ! command -v $cmd &>/dev/null; then
+            pkg install $cmd -y
+        fi
+    done
+
+    figlet SANIN WA | lolcat
+    echo "By: Mukticuy" | boxes -d parchment | lolcat
+    echo
+}
+
+# ===== 📦 INSTALL DEPENDENSI
+function install_dependencies() {
+    echo "[⚙️] Cek dan install dependensi..." | lolcat
+    pkg update -y && pkg upgrade -y
+
+    for pkg in nodejs git; do
+        if ! command -v $pkg &>/dev/null; then
+            pkg install $pkg -y
+        fi
+    done
+
+    echo "[📁] Cek folder node_modules..." | lolcat
+    cd "$PROJECT_DIR"
+    if [ ! -d "node_modules" ]; then
+        echo "[📦] node_modules belum ada. Jalankan npm install..." | lolcat
+        npm install
+    else
+        echo "[✅] node_modules sudah tersedia" | lolcat
+    fi
+}
+
+# ===== 🚀 JALANKAN BACKEND
+function start_backend() {
+    echo
+    echo "[🚀] Menjalankan server WhatsApp..." | boxes -d peek | lolcat
+    echo
+    cd
+    cd "$PROJECT_DIR"
+    while true; do
+        node index.js
+        echo "[💥] Server mati. Restarting dalam 3 detik..." | lolcat
+        sleep 3
+    done
+}
+
+# ===== 🔁 AUTO SALIN KE $PREFIX/bin
+function install_command() {
+    SCRIPT_PATH="$PREFIX/bin/sanin"
+    if [ ! -f "$SCRIPT_PATH" ]; then
+        echo "[🛠️] Menambahkan shortcut 'sanin' ke \$PREFIX/bin" | lolcat
+        cp "$0" "$SCRIPT_PATH"
+        chmod +x "$SCRIPT_PATH"
+        echo "[✅] Shortcut 'sanin' berhasil dibuat. Sekarang bisa ketik 'sanin' dari mana aja" | lolcat
+        echo
+    fi
+}
+
+# ===== 🧠 MAIN
+show_banner
+install_command
+install_dependencies
+start_backend
