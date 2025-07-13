@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/bash
+#!/usr/bin/env bash
 
 PROJECT_DIR="$HOME/sanin-backend"
 GITHUB_URL="https://raw.githubusercontent.com/MukutiAji/SaninBackend/main/sanin"
@@ -6,8 +6,25 @@ SCRIPT_PATH="$PREFIX/bin/sanin"
 AUDIO_URL="https://raw.githubusercontent.com/MukutiAji/SaninBackend/main/startup.mp3"
 AUDIO_FILE="$PROJECT_DIR/startup.mp3"
 
+# ==== 🧠 DETEKSI OS & PACKAGE MANAGER
+if [[ "$OSTYPE" == "linux-android" ]]; then
+  PKG_INSTALLER="pkg"
+  PKG_UPDATE="pkg update -y && pkg upgrade -y"
+else
+  if command -v apt-get &>/dev/null; then
+    PKG_INSTALLER="apt-get"
+    PKG_UPDATE="apt-get update -y && apt-get upgrade -y"
+  elif command -v brew &>/dev/null; then
+    PKG_INSTALLER="brew"
+    PKG_UPDATE="brew update"
+  else
+    echo "❌ Sistem tidak dikenali. Install manual: nala, figlet, boxes, mpv, nodejs, git"
+    exit 1
+  fi
+fi
+
 # ==== 🎨 WARNA RANDOM CERAH
-COLORS=(32 33 34 35 36 91 92 93 94 95 96) # hijau kuning biru pink cyan dll
+COLORS=(32 33 34 35 36 91 92 93 94 95 96)
 RANDOM_COLOR=${COLORS[$RANDOM % ${#COLORS[@]}]}
 
 # ==== 🔤 FUNGSI CETAK BERWARNA
@@ -21,11 +38,8 @@ print_output() {
   done
 }
 
-# ==== 🎭 ASCII ART OPENING + CEK TOOLS
 ascii_art() {
   clear
-
-  # Tampilkan ascii pembuka
   echo
   cetak "╭━━━┳━━━┳━╮╱╭┳━━┳━╮╱╭╮"
   cetak "┃╭━╮┃╭━╮┃┃╰╮┃┣┫┣┫┃╰╮┃┃"
@@ -37,30 +51,16 @@ ascii_art() {
 
   cetak "🔍 Cek awal dependensi (nala, figlet, boxes)..."
 
-  # Cek dan install nala, figlet, boxes
-  if ! command -v nala &>/dev/null; then
-    cetak "[📥] Menginstall nala..."
-    apt-get install nala -y | print_output
-  else
-    cetak "[📦] nala sudah terinstall"
-  fi
-
-  if ! command -v figlet &>/dev/null; then
-    cetak "[📥] Menginstall figlet..."
-    apt-get install figlet -y | print_output
-  else
-    cetak "[✅] figlet sudah terinstall"
-  fi
-
-  if ! command -v boxes &>/dev/null; then
-    cetak "[📥] Menginstall boxes..."
-    apt-get install boxes -y | print_output
-  else
-    cetak "[✅] boxes sudah terinstall"
-  fi
+  for tool in nala figlet boxes; do
+    if ! command -v "$tool" &>/dev/null; then
+      cetak "[📥] Menginstall $tool..."
+      $PKG_INSTALLER install "$tool" -y | print_output
+    else
+      cetak "[✅] $tool sudah terinstall"
+    fi
+  done
 
   sleep 2
-
   clear
 }
 
@@ -72,7 +72,7 @@ play_startup_sound() {
 
   if ! command -v mpv &>/dev/null; then
     cetak "[🎵] Player mpv belum ada. Menginstall..."
-    apt-get install mpv -y | print_output
+    $PKG_INSTALLER install mpv -y | print_output
   fi
 
   if [ ! -f "$AUDIO_FILE" ]; then
@@ -84,7 +84,6 @@ play_startup_sound() {
   mpv --no-video --really-quiet "$AUDIO_FILE" &
 }
 
-# ==== 📦 CEK & INSTALL PAKET
 pkg_install() {
   if command -v nala &>/dev/null; then
     cetak "[📦] Menggunakan nala..."
@@ -98,7 +97,7 @@ pkg_install() {
   else
     for pkg in "$@"; do
       if ! command -v $pkg &>/dev/null; then
-        pkg install $pkg -y | print_output
+        $PKG_INSTALLER install $pkg -y | print_output
       else
         cetak "[✅] $pkg sudah terinstall"
       fi
@@ -106,14 +105,10 @@ pkg_install() {
   fi
 }
 
-# ==== 🎨 BANNER SANIN
 show_banner() {
   clear
   echo
-
-  # Tampilkan figlet tanpa kode ANSI bocor
   figlet -w 100 "SANIN WA" | while IFS= read -r line; do
-    # Hapus ANSI escape code dari figlet (kalau ada)
     clean_line=$(echo -e "$line" | sed 's/\x1b\[[0-9;]*m//g')
     cetak "$clean_line"
   done
@@ -122,15 +117,12 @@ show_banner() {
     clean_line=$(echo -e "$line" | sed 's/\x1b\[[0-9;]*m//g')
     cetak "$clean_line"
   done
-
   echo
 }
 
-# ==== ⚙️ CEK DEPENDENSI
 install_dependencies() {
   cetak "[⚙️] Cek dan install dependensi..."
-  pkg update -y 2>/dev/null | print_output
-  pkg upgrade -y 2>/dev/null | print_output
+  eval "$PKG_UPDATE" 2>/dev/null | print_output
   pkg_install nodejs git
   cd "$PROJECT_DIR" || exit
   cetak "[📁] Cek folder node_modules..."
@@ -142,7 +134,6 @@ install_dependencies() {
   fi
 }
 
-# ==== 🚀 JALANKAN BACKEND
 start_backend() {
   echo
   cetak "[🚀] Menjalankan server WhatsApp..."
@@ -155,7 +146,6 @@ start_backend() {
   done
 }
 
-# ==== 🔁 INSTALL KE $PREFIX/bin
 install_command() {
   if [ ! -f "$SCRIPT_PATH" ]; then
     cetak "[🛠️] Menambahkan shortcut 'sanin' ke \$PREFIX/bin"
