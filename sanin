@@ -3,6 +3,8 @@
 PROJECT_DIR="$HOME/sanin-backend"
 GITHUB_URL="https://raw.githubusercontent.com/MukutiAji/SaninBackend/main/sanin"
 SCRIPT_PATH="$PREFIX/bin/sanin"
+AUDIO_URL="https://raw.githubusercontent.com/MukutiAji/SaninBackend/main/startup.mp3"
+AUDIO_FILE="$PROJECT_DIR/startup.mp3"
 
 # ==== 🎨 WARNA RANDOM CERAH
 COLORS=(32 33 34 35 36 91 92 93 94 95 96) # hijau kuning biru pink cyan dll
@@ -60,6 +62,26 @@ ascii_art() {
   sleep 2
 
   clear
+}
+
+play_startup_sound() {
+  if [[ $1 == "--mute" ]]; then
+    cetak "[🔇] Mode sunyi diaktifkan"
+    return
+  fi
+
+  if ! command -v mpv &>/dev/null; then
+    cetak "[🎵] Player mpv belum ada. Menginstall..."
+    apt-get install mpv -y | print_output
+  fi
+
+  if [ ! -f "$AUDIO_FILE" ]; then
+    cetak "[📥] Download audio startup..."
+    curl -L -o "$AUDIO_FILE" "$AUDIO_URL" | print_output
+  fi
+
+  cetak "[🎧] Memutar suara startup..."
+  mpv --no-video --really-quiet "$AUDIO_FILE" &
 }
 
 # ==== 📦 CEK & INSTALL PAKET
@@ -157,6 +179,7 @@ fi
 
 # ==== 🧠 EKSEKUSI
 ascii_art
+play_startup_sound "$1"
 show_banner
 install_command
 install_dependencies
