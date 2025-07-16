@@ -17,6 +17,9 @@ else
   elif command -v brew &>/dev/null; then
     PKG_INSTALLER="brew"
     PKG_UPDATE="brew update"
+  elif command -v sudo apt &>/dev/null; then
+    PKG_INSTALLER="sudo apt"
+    PKG_UPDATE="sudo apt update"
   else
     echo "❌ Sistem tidak dikenali. Install manual: nala, figlet, boxes, mpv, nodejs, git"
     exit 1
